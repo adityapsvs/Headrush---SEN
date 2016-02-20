@@ -1,0 +1,15 @@
+/* CSS declarations go here */
+@import url(//fonts.googleapis.com/css?family=Open+Sans);
+.title{
+
+text-align: center;
+font-size: 30px;
+font-style: italic;
+font-weight: bolder;
+font-family: 'Open Sans', sans-serif;
+color:#6f2929;
+}
+
+.container{
+	background: linear-gradient(#ffaf78, white); 
+}
