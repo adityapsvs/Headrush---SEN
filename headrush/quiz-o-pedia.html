@@ -54,10 +54,29 @@
 
 	</template>
 
+<template name="takeQuiz">
+	<form id="logout-form">Welcome {{currentUser.profile.fullname}}<br /><button class="btn btn-danger" type="submit">Log Out</button>
+</form>
+</template>
+
 <template name="logoutForm">
 
-		<form id="logout-form">
-			{{currentUser.profile.fullname}}<br /><button class="btn btn-danger" type="submit">Log Out</button>
+		<form id="logout-form">Welcome {{currentUser.profile.fullname}}<br /><button class="btn btn-danger" type="submit">Log Out</button>
+
+		<h1> Category </h1>
+			<input type="radio" name="category" value="general" /> General
+  			<input type="radio" name="category" value="sports" /> Sports
+  			<input type="radio" name="category" value="mela" /> Mela
+			<input type="radio" name="category" value="movie" /> Movie
+			<input type="radio" name="category" value="vices" /> Vices
+		<br/><br/>
+
+		<h2> Quiz Type </h2>
+			<input type="radio" name="quiztype" value="ind" /> Individual
+			<input type="radio" name="quiztype" value="group" /> Group
+		<br/><br/>
+
+		<button id="nextpage">Take Quiz</button>
 
 		</form>
 </template>
@@ -112,3 +131,4 @@
 		</form>
 	{{/if}}
 </template>
+
