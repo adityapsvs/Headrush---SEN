@@ -21,10 +21,13 @@ if (Meteor.isClient) {
     }
   });
 Template.logoutForm.events({
-    'click .btn': function() {
+    'click .btn-danger': function() {
       Meteor.logout();
     }
+
 });
+
+
 
   Template.loginForm.events({
     'submit #login-form': function(e,t) {
