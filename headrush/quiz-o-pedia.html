@@ -1,134 +1,159 @@
-<head>
-  <title>loginpage</title>
-</head>
 
-<body class="container">
-	<h3 class="title">Quiz-o-Pedia</h3>
-	<br /><br /><br /><br />
-	
-		{{#if currentUser}}
+Router.configure({
+  layoutTemplate: 'quizopedia'
+});
 
-			{{> logoutForm}}
+ThisQuiz = new Mongo.Collection('quizzes');
+Test = new Mongo.Collection('test');
 
- 		{{else}}
+var previousValue = 0;
 
- 		<div class="container">
- 			<div class="row">
- 					<div class="col-md-6 col-lg-6">
- 			{{> loginForm}}
- 					</div>
- 					<div class="col-md-6 col-lg-6">
- 			{{> signupForm}}
- 				</div>
- 			</div>
+Router.route('/quiz', {
+  name: 'currentquiz',
+  template: 'currentquiz'
+});
 
- 			<div class="row">
- 				{{> recovery}}
- 			</div>	
- 		</div>
- 		{{/if}}	
-</body>
+Router.route('/', {
+  name: 'quizopediahome',
+  template: 'quizopediahome'
+});
 
-<template name="signupForm">
-		<form id="signup-form">
-			<h2>Sign Up</h2>
+Router.route('/addquiz', {
+  name: 'addquiz',
+  template: 'addquiz'
+});
 
-			<label for="signup-username">Username</label>
-			<input type="text" id="signup-username" class="form-control" placeholder="Username" /><br />
+Router.route('/takequiz', {
+  name: 'takequiz',
+  template: 'takequiz'
+});
 
-			
-			<label for="signup-email">Email</label>
-			<input type="text" id="signup-email" class="form-control" placeholder="Email" /><br />
+/*
+Router.map(function() {
+    this.route('quizopediahome', {path: '/'});
+    this.route('addquiz', {path : '/addquiz'});
+    this.route('takequiz', {path : '/takequiz'});
+    this.route('currentquiz', {path : '/quiz'});
+});
 
-			
-			<label for="signup-password">Password</label>
-			<input type="password" id="signup-password" class="form-control" placeholder="Password" /><br />
+var mustBeSignedIn = function() {
+    if (!(Meteor.user() || Meteor.loggingIn())) {
+        Router.go('addquiz');
+    } else {
+        this.next();
+    }
+};
+var goHome = function() {
+    if (Meteor.user()) {
+        Router.go('quizopediahome');
+    } else {
+        this.next();
+    }
+};
 
-			
-			<label for="signup-name">Name</label>
-			<input type="text" id="signup-name" class="form-control" placeholder="name" /><br />
-
-			<button class="btn btn-primary" type="submit">SignUp</button>
-
-		</form>
-
-	</template>
-
-<template name="takeQuiz">
-	<form id="logout-form">Welcome {{currentUser.profile.fullname}}<br /><button class="btn btn-danger" type="submit">Log Out</button>
-</form>
-</template>
-
-<template name="logoutForm">
-
-		<form id="logout-form">Welcome {{currentUser.profile.fullname}}<br /><button class="btn btn-danger" type="submit">Log Out</button>
-
-		<h1> Category </h1>
-			<input type="radio" name="category" value="general" /> General
-  			<input type="radio" name="category" value="sports" /> Sports
-  			<input type="radio" name="category" value="mela" /> Mela
-			<input type="radio" name="category" value="movie" /> Movie
-			<input type="radio" name="category" value="vices" /> Vices
-		<br/><br/>
-
-		<h2> Quiz Type </h2>
-			<input type="radio" name="quiztype" value="ind" /> Individual
-			<input type="radio" name="quiztype" value="group" /> Group
-		<br/><br/>
-
-		<button id="nextpage">Take Quiz</button>
-
-		</form>
-</template>
-
-<template name="loginForm">
-	<form id="login-form">
-			<h2>Log In</h2>
-
-			<label for="login-username">Username</label>
-			<input type="text" id="login-username" class="form-control" placeholder="Username" /><br />
-
-			<label for="login-password">Password</label>
-			<input type="password" id="login-password" class="form-control" placeholder="Password" /><br />
-
-			<button class="btn btn-primary" type="submit">Log In</button>
-
-		</form>
+Router.onBeforeAction(mustBeSignedIn, {except: ['addquiz']});
+Router.onBeforeAction(goHome, {only: ['quizopediahome', 'addquiz']});
+*/
+if (Meteor.isClient) {
+Template.logoutForm.events({
+    'click .btn-danger': function(e,t) {
+         e.preventDefault();
+         Meteor.logout();
+         Router.go('quizopediahome');
+         // Meteor.logout(function(err) {
+  // callback
+  // Session.set("ses",false);
+// });
+    }
+});
 
 
+  // Template.tplName.events
+  // "click #logout": (e, tmpl) ->
+  //   Meteor.logout ->
+  //     Session.set "ses", false
 
-</template>
-<template name="recovery">
-	{{#if resetPassword}}
-		<form id="newPassword" action="action">
-
-			<div class="row">
-					<div class="col-md-4 col-lg-4">
-							<input type="text" class="form-control" id="new-password-password" />
-							<input type="submit" class="form-control" value="Change Password"/>
-					</div>
+  Template.loginForm.events({
+    'submit #login-form': function(e,t) {
+      e.preventDefault();
 
 
-			</div>	
+      var unam=t.find('#login-username').value;
+      var password=t.find('#login-password').value;
+      Meteor.loginWithPassword(unam,password);
+      if(null !== currentUser && unam === 'admin'){
+          Router.go('addquiz');
+      }
+
+      else{
+        if(null !== currentUser)
+          Router.go('takequiz');
+        
+      }
+    }
+});
+
+Template.addquiz.events({
+    "submit .quizEntry": function (event) {
+
+      event.preventDefault();
+      var que_array = new Array();
+      var creater =  event.target.creater.value;
+      var category =  event.target.category.value;
+
+      for (var i = 1; i <= 2; i++) {
+        eval("var que" + "= event.target.question" + i + ".value");
+        eval("var ans" + "= event.target.question" + i + "_answer.value");
+
+        for (var op = 1; op <= 4; op++) {
+          eval("var opt" + op + "= event.target.question" + i + "_option" + op + ".value");
+        }
+        que_array.push({question: que, option1: opt1, option2: opt2, option3: opt3, option4: opt4, answer: ans});
+      }
+      //console.log(que_object);
+      Meteor.call("addQuiz", creater, category, que_array);
+    }
+  });
+
+Template.takequiz.events({
+  'click [name=startQuiz]': function() {
+
+      var selectedCategory = $('#categories option:selected').text();
+      Session.set('category', selectedCategory);
+      Router.go('currentquiz');
+    }
+});
+
+Template.currentquiz.helpers({
+  'quizzes': function() {
+      var selectedCategory = Session.get('category');
+      var count = ThisQuiz.find( {category: selectedCategory}).count();
+      console.log(count);
+      var index = Math.floor(count * Math.random());
+      if(index == previousValue){
+        
+      }
+      var previousValue = index;
+      console.log(index);
+      return ThisQuiz.find( {category: selectedCategory}, {skip: index, limit: 1} );
+    },
+  'categorySelected': function() {
+    //console.log(Session.get('category'));
+    return Session.get('category');
+  },
+  'check': function() {
+    return Test.find({});
+  },
+  'questions': function() {
+    return this.quiz;
+  }
+});
+
+}
 
 
-		</form>
-
-	{{else}}
-
-<form id="recovery-form" action="action">
-
-			<div class="row">
-					<div class="col-md-4 col-lg-4">
-							<input type="text" class="form-control" id="recovery-email" />
-							<input type="submit" class="form-control" value="Send Reset Instructions"/>
-					</div>
-
-
-			</div>	
-
-
-		</form>
-	{{/if}}
-</template>
-
+if (Meteor.isServer) {
+  Meteor.startup(function () {
+   
+  });
+}
