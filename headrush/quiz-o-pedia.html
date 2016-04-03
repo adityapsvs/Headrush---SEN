@@ -1,159 +1,136 @@
+<template name="quizopediahome">
+  <p>Welcome to Quiz-o-pedia</p>
+  {{> signupForm}}
+  {{> loginForm}}
+</template>
 
-Router.configure({
-  layoutTemplate: 'quizopedia'
-});
+<template name="addquiz">
 
-ThisQuiz = new Mongo.Collection('quizzes');
-Test = new Mongo.Collection('test');
+	{{> logoutForm}}
+  <form id="quizEntry" class="quizEntry">
 
-var previousValue = 0;
+    <label>Quiz Creater</label>
+    <input id='creater' type='text' required /> <br>
 
-Router.route('/quiz', {
-  name: 'currentquiz',
-  template: 'currentquiz'
-});
+    <label>Category</label>
+    <select id="category">
+      <option value="General">General</option>
+      <option value="MELA">MELA</option>
+      <option value="Sports">Sports</option>
+    </select> <br>
 
-Router.route('/', {
-  name: 'quizopediahome',
-  template: 'quizopediahome'
-});
-
-Router.route('/addquiz', {
-  name: 'addquiz',
-  template: 'addquiz'
-});
-
-Router.route('/takequiz', {
-  name: 'takequiz',
-  template: 'takequiz'
-});
-
-/*
-Router.map(function() {
-    this.route('quizopediahome', {path: '/'});
-    this.route('addquiz', {path : '/addquiz'});
-    this.route('takequiz', {path : '/takequiz'});
-    this.route('currentquiz', {path : '/quiz'});
-});
-
-var mustBeSignedIn = function() {
-    if (!(Meteor.user() || Meteor.loggingIn())) {
-        Router.go('addquiz');
-    } else {
-        this.next();
-    }
-};
-var goHome = function() {
-    if (Meteor.user()) {
-        Router.go('quizopediahome');
-    } else {
-        this.next();
-    }
-};
-
-Router.onBeforeAction(mustBeSignedIn, {except: ['addquiz']});
-Router.onBeforeAction(goHome, {only: ['quizopediahome', 'addquiz']});
-*/
-if (Meteor.isClient) {
-Template.logoutForm.events({
-    'click .btn-danger': function(e,t) {
-         e.preventDefault();
-         Meteor.logout();
-         Router.go('quizopediahome');
-         // Meteor.logout(function(err) {
-  // callback
-  // Session.set("ses",false);
-// });
-    }
-});
-
-
-  // Template.tplName.events
-  // "click #logout": (e, tmpl) ->
-  //   Meteor.logout ->
-  //     Session.set "ses", false
-
-  Template.loginForm.events({
-    'submit #login-form': function(e,t) {
-      e.preventDefault();
-
-
-      var unam=t.find('#login-username').value;
-      var password=t.find('#login-password').value;
-      Meteor.loginWithPassword(unam,password);
-      if(null !== currentUser && unam === 'admin'){
-          Router.go('addquiz');
-      }
-
-      else{
-        if(null !== currentUser)
-          Router.go('takequiz');
-        
-      }
-    }
-});
-
-Template.addquiz.events({
-    "submit .quizEntry": function (event) {
-
-      event.preventDefault();
-      var que_array = new Array();
-      var creater =  event.target.creater.value;
-      var category =  event.target.category.value;
-
+    <script type="text/javascript">
+      var form_string = "";
       for (var i = 1; i <= 2; i++) {
-        eval("var que" + "= event.target.question" + i + ".value");
-        eval("var ans" + "= event.target.question" + i + "_answer.value");
+        form_string += "<label>Question "+ i +"</label>";
+        form_string += "<input id='question" + i + "' type='text' required /> <br>" ;
 
         for (var op = 1; op <= 4; op++) {
-          eval("var opt" + op + "= event.target.question" + i + "_option" + op + ".value");
+          form_string += "<label>Option "+ op +"</label>";
+          form_string += "<input id='question" + i + "_option" + op + "' type='text' required /> <br>";
         }
-        que_array.push({question: que, option1: opt1, option2: opt2, option3: opt3, option4: opt4, answer: ans});
+
+        form_string += "<label>Answer "+ i +"</label>";
+        form_string += "<input id='question" + i + "_answer" + "' type='number' min='1' max='4' step='1' required /> <br>";
       }
-      //console.log(que_object);
-      Meteor.call("addQuiz", creater, category, que_array);
-    }
-  });
+      form_string += "<button type='submit' value='Submit'>Submit</button>";
 
-Template.takequiz.events({
-  'click [name=startQuiz]': function() {
+       //document.write(form_string);
+      var temp = document.getElementById('quizEntry');
+      temp.insertAdjacentHTML('beforeend', form_string);
+    </script>
 
-      var selectedCategory = $('#categories option:selected').text();
-      Session.set('category', selectedCategory);
-      Router.go('currentquiz');
-    }
-});
+    </form>
 
-Template.currentquiz.helpers({
-  'quizzes': function() {
-      var selectedCategory = Session.get('category');
-      var count = ThisQuiz.find( {category: selectedCategory}).count();
-      console.log(count);
-      var index = Math.floor(count * Math.random());
-      if(index == previousValue){
-        
-      }
-      var previousValue = index;
-      console.log(index);
-      return ThisQuiz.find( {category: selectedCategory}, {skip: index, limit: 1} );
-    },
-  'categorySelected': function() {
-    //console.log(Session.get('category'));
-    return Session.get('category');
-  },
-  'check': function() {
-    return Test.find({});
-  },
-  'questions': function() {
-    return this.quiz;
-  }
-});
+</template>
 
-}
+<template name="takequiz">
+
+	{{> logoutForm}}
+  <p>Select Quiz Type:</p>
+  <input type="radio" value="individual" name="individual" checked>Individual<br><br>
+  <input type="radio" value="group" name="group">Group<br><br>
+  <p>Select a Category:</p>
+  <select id="categories">
+    <option value="general">General</option>
+    <option value="mela">MELA</option>
+    <option value="sports">Sports</option>
+  </select> <br><br>
+  <input type="button" name="startQuiz" value="Enter Quiz">
+</template>
+
+<template name="currentquiz">
+	{{> logoutForm}}
+      {{#each quizzes}}
+        {{#each questions}}
+          <p>Question: {{question}}</p>
+          <input type="radio" name="option" value="{{option1}}">{{option1}}<br>
+          <input type="radio" name="option" value="{{option2}}">{{option2}}<br>
+          <input type="radio" name="option" value="{{option3}}">{{option3}}<br>
+          <input type="radio" name="option" value="{{option4}}">{{option4}}<br>
+        {{/each}}
+      {{/each}}
+
+      <!--{{#each check}}
+        <ul>
+          <li>Name: {{name}}, CreatedAt: {{createdAt}}</li>
+        </ul>
+      {{/each}} -->
+</template>
+
+<template name="quizopedia">
+  <h1>Quiz-o-pedia</h1>
+  {{> yield }}
+  <hr>
+  <footer>Copyright &copy; 2016-2017, Quiz-o-pedia, Team 21</footer>
+</template>
+
+<template name="loginForm">
+	<form id="login-form">
+			<h2>Log In</h2>
+
+			<label for="login-username">Username</label>
+			<input type="text" id="login-username" class="form-control" placeholder="Username" /><br />
+
+			<label for="login-password">Password</label>
+			<input type="password" id="login-password" class="form-control" placeholder="Password" /><br />
+
+			<button class="btn btn-primary" type="submit">Log In</button>
+
+		</form>
 
 
-if (Meteor.isServer) {
-  Meteor.startup(function () {
-   
-  });
-}
+
+</template>
+
+<template name="signupForm">
+		<form id="signup-form">
+			<h2>Sign Up</h2>
+
+			<label for="signup-username">Username</label>
+			<input type="text" id="signup-username" class="form-control" placeholder="Username" /><br />
+
+			
+			<label for="signup-email">Email</label>
+			<input type="text" id="signup-email" class="form-control" placeholder="Email" /><br />
+
+			
+			<label for="signup-password">Password</label>
+			<input type="password" id="signup-password" class="form-control" placeholder="Password" /><br />
+
+			
+			<label for="signup-name">Name</label>
+			<input type="text" id="signup-name" class="form-control" placeholder="name" /><br />
+
+			<button class="btn btn-primary" type="submit">SignUp</button>
+
+		</form>
+
+	</template>
+
+	<template name="logoutForm">
+
+		<form id="logout-form">Welcome {{currentUser.profile.fullname}}<br /><button class="btn btn-danger" type="submit">Log Out</button>
+		</form>
+</template>
+
