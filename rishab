@@ -143,7 +143,7 @@ Template.addquiz.events({
     "submit .responseEntry": function (event) {
 
       event.preventDefault();
-      var que_array = new Array();
+      var res_array = new Array();
 	  var score=0;
       
 
@@ -155,14 +155,23 @@ Template.addquiz.events({
 			score+=10;
 		}
         
-        que_array.push({response: res, correct: ans});
-		db.Check.insert(que_array);
+        res_array.push({response: res, correct: cor});
+		Check.insert(res_array);
       }
+	  Session.set('score', score);
+	  //Check.insert( { response: 1, correct: 2 } );
+	  
       //console.log(que_object);
-      Meteor.call("checkResponses", que_array);
+      //Meteor.call("checkResponses", res_array);
 	  console.log(score);
     }
   });
+  
+  Template.checkResponses.helpers({
+	  'dispScore': function() {
+		  return Session.get('score');
+	  }
+  })
   
   
 
