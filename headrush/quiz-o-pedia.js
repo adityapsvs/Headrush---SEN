@@ -1,10 +1,10 @@
-
 Router.configure({
   layoutTemplate: 'quizopedia'
 });
 
 ThisQuiz = new Mongo.Collection('quizzes');
 Test = new Mongo.Collection('test');
+Check=new Mongo.Collection('checks');
 
 var previousValue = 0;
 
@@ -28,6 +28,16 @@ Router.route('/takequiz', {
   template: 'takequiz'
 });
 
+Router.route('/checkResponses', {
+  name: 'checkResponses',
+  template: 'checkResponses'
+});
+
+Router.route('/scorecard', {
+  name: 'scorecard',
+  template: 'scorecard'
+});
+
 /*
 Router.map(function() {
     this.route('quizopediahome', {path: '/'});
@@ -35,7 +45,6 @@ Router.map(function() {
     this.route('takequiz', {path : '/takequiz'});
     this.route('currentquiz', {path : '/quiz'});
 });
-
 var mustBeSignedIn = function() {
     if (!(Meteor.user() || Meteor.loggingIn())) {
         Router.go('addquiz');
@@ -50,7 +59,6 @@ var goHome = function() {
         this.next();
     }
 };
-
 Router.onBeforeAction(mustBeSignedIn, {except: ['addquiz']});
 Router.onBeforeAction(goHome, {only: ['quizopediahome', 'addquiz']});
 */
@@ -81,12 +89,12 @@ Template.logoutForm.events({
       var unam=t.find('#login-username').value;
       var password=t.find('#login-password').value;
       Meteor.loginWithPassword(unam,password);
-      if(null !== currentUser && unam === 'admin'){
+      if(unam === 'admin'){
           Router.go('addquiz');
       }
 
       else{
-        if(null !== currentUser)
+        
           Router.go('takequiz');
         
       }
@@ -114,6 +122,42 @@ Template.addquiz.events({
       Meteor.call("addQuiz", creater, category, que_array);
     }
   });
+
+ Template.checkResponses.events({
+    "submit .responseEntry": function (event) {
+
+      event.preventDefault();
+      var res_array = new Array();
+    var score=0;
+      
+
+      for (var i = 1; i <= 2; i++) {
+        eval("var res" + "= event.target.response" + i + ".value");
+        eval("var cor" + "= event.target.response" + i + "_correctAnswer.value");
+    console.log(res+" "+cor);
+    if(res===cor){
+      score+=10;
+    }
+        
+        res_array.push({response: res, correct: cor});
+    Check.insert(res_array);
+      }
+    Session.set('score', score);
+    //Check.insert( { response: 1, correct: 2 } );
+    
+      //console.log(que_object);
+      //Meteor.call("checkResponses", res_array);
+    console.log(score);
+    }
+  });
+  
+  Template.checkResponses.helpers({
+    'dispScore': function() {
+      return Session.get('score');
+    }
+  });
+
+  
 
 Template.takequiz.events({
   'click [name=startQuiz]': function() {
