@@ -6,7 +6,7 @@
 
 <template name="addquiz">
 
-	{{> logoutForm}}
+  {{> logoutForm}}
   <form id="quizEntry" class="quizEntry">
 
     <label>Quiz Creater</label>
@@ -24,17 +24,14 @@
       for (var i = 1; i <= 2; i++) {
         form_string += "<label>Question "+ i +"</label>";
         form_string += "<input id='question" + i + "' type='text' required /> <br>" ;
-
         for (var op = 1; op <= 4; op++) {
           form_string += "<label>Option "+ op +"</label>";
           form_string += "<input id='question" + i + "_option" + op + "' type='text' required /> <br>";
         }
-
         form_string += "<label>Answer "+ i +"</label>";
         form_string += "<input id='question" + i + "_answer" + "' type='number' min='1' max='4' step='1' required /> <br>";
       }
       form_string += "<button type='submit' value='Submit'>Submit</button>";
-
        //document.write(form_string);
       var temp = document.getElementById('quizEntry');
       temp.insertAdjacentHTML('beforeend', form_string);
@@ -46,7 +43,7 @@
 
 <template name="takequiz">
 
-	{{> logoutForm}}
+  {{> logoutForm}}
   <p>Select Quiz Type:</p>
   <input type="radio" value="individual" name="individual" checked>Individual<br><br>
   <input type="radio" value="group" name="group">Group<br><br>
@@ -60,7 +57,7 @@
 </template>
 
 <template name="currentquiz">
-	{{> logoutForm}}
+  {{> logoutForm}}
       {{#each quizzes}}
         {{#each questions}}
           <p>Question: {{question}}</p>
@@ -86,51 +83,89 @@
 </template>
 
 <template name="loginForm">
-	<form id="login-form">
-			<h2>Log In</h2>
+  <form id="login-form">
+      <h2>Log In</h2>
 
-			<label for="login-username">Username</label>
-			<input type="text" id="login-username" class="form-control" placeholder="Username" /><br />
+      <label for="login-username">Username</label>
+      <input type="text" id="login-username" class="form-control" placeholder="Username" /><br />
 
-			<label for="login-password">Password</label>
-			<input type="password" id="login-password" class="form-control" placeholder="Password" /><br />
+      <label for="login-password">Password</label>
+      <input type="password" id="login-password" class="form-control" placeholder="Password" /><br />
 
-			<button class="btn btn-primary" type="submit">Log In</button>
+      <button class="btn btn-primary" type="submit">Log In</button>
 
-		</form>
+    </form>
 
 
 
 </template>
 
 <template name="signupForm">
-		<form id="signup-form">
-			<h2>Sign Up</h2>
+    <form id="signup-form">
+      <h2>Sign Up</h2>
 
-			<label for="signup-username">Username</label>
-			<input type="text" id="signup-username" class="form-control" placeholder="Username" /><br />
+      <label for="signup-username">Username</label>
+      <input type="text" id="signup-username" class="form-control" placeholder="Username" /><br />
 
-			
-			<label for="signup-email">Email</label>
-			<input type="text" id="signup-email" class="form-control" placeholder="Email" /><br />
+      
+      <label for="signup-email">Email</label>
+      <input type="text" id="signup-email" class="form-control" placeholder="Email" /><br />
 
-			
-			<label for="signup-password">Password</label>
-			<input type="password" id="signup-password" class="form-control" placeholder="Password" /><br />
+      
+      <label for="signup-password">Password</label>
+      <input type="password" id="signup-password" class="form-control" placeholder="Password" /><br />
 
-			
-			<label for="signup-name">Name</label>
-			<input type="text" id="signup-name" class="form-control" placeholder="name" /><br />
+      
+      <label for="signup-name">Name</label>
+      <input type="text" id="signup-name" class="form-control" placeholder="name" /><br />
 
-			<button class="btn btn-primary" type="submit">SignUp</button>
+      <button class="btn btn-primary" type="submit">SignUp</button>
 
-		</form>
+    </form>
 
-	</template>
+  </template>
 
-	<template name="logoutForm">
+  <template name="logoutForm">
 
-		<form id="logout-form">Welcome {{currentUser.profile.fullname}}<br /><button class="btn btn-danger" type="submit">Log Out</button>
-		</form>
+    <form id="logout-form">Welcome {{currentUser.profile.fullname}}<br /><button class="btn btn-danger" type="submit">Log Out</button>
+    </form>
 </template>
 
+<template name="checkResponses">
+
+  {{> logoutForm}}
+  {{dispScore}}
+  <form id="responseEntry" class="responseEntry">
+
+    
+
+    <script type="text/javascript">
+      var form_string = "";
+      for (var i = 1; i <= 2; i++) {
+        form_string += "<label>Response "+ i +"</label>";
+        form_string += "<input id='response" + i + "' type='number' required /> <br>" ;
+
+        
+
+        form_string += "<label>correctAnswer "+ i +"</label>";
+        form_string += "<input id='response" + i + "_correctAnswer" + "' type='number' min='1' max='4' step='1' required /> <br>";
+      }
+      form_string += "<button type='submit' value='Submit'>Submit</button>";
+
+       //document.write(form_string);
+      var temp = document.getElementById('responseEntry');
+      temp.insertAdjacentHTML('beforeend', form_string);
+    </script>
+
+    </form>
+
+</template>
+
+<!-- <template name="scorecard">
+
+  {{> logoutForm}}
+
+  
+  
+
+</template> -->
