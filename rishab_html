@@ -1,164 +1,57 @@
-<template name="quizopediahome">
-  <p>Welcome to Quiz-o-pedia</p>
-  {{> signupForm}}
-  {{> loginForm}}
+<template name="ApplicationLayout">
+	{{>yield "template1"}}
+	{{>yield "template2"}}
 </template>
 
-<template name="addquiz">
-
-	{{> logoutForm}}
-  <form id="quizEntry" class="quizEntry">
-
-    <label>Quiz Creater</label>
-    <input id='creater' type='text' required /> <br>
-
-    <label>Category</label>
-    <select id="category">
-      <option value="General">General</option>
-      <option value="MELA">MELA</option>
-      <option value="Sports">Sports</option>
-    </select> <br>
-
-    <script type="text/javascript">
-      var form_string = "";
-      for (var i = 1; i <= 2; i++) {
-        form_string += "<label>Question "+ i +"</label>";
-        form_string += "<input id='question" + i + "' type='text' required /> <br>" ;
-
-        for (var op = 1; op <= 4; op++) {
-          form_string += "<label>Option "+ op +"</label>";
-          form_string += "<input id='question" + i + "_option" + op + "' type='text' required /> <br>";
-        }
-
-        form_string += "<label>Answer "+ i +"</label>";
-        form_string += "<input id='question" + i + "_answer" + "' type='number' min='1' max='4' step='1' required /> <br>";
-      }
-      form_string += "<button type='submit' value='Submit'>Submit</button>";
-
-       //document.write(form_string);
-      var temp = document.getElementById('quizEntry');
-      temp.insertAdjacentHTML('beforeend', form_string);
-    </script>
-
-    </form>
-
+<template name="login">
+	{{> loginButtons}}
 </template>
 
-<template name="checkResponses">
+<template name="emptyTemplate"></template>
 
-	{{> logoutForm}}
-	{{dispScore}}
-  <form id="responseEntry" class="responseEntry">
 
-    
 
-    <script type="text/javascript">
-      var form_string = "";
-      for (var i = 1; i <= 2; i++) {
-        form_string += "<label>Response "+ i +"</label>";
-        form_string += "<input id='response" + i + "' type='number' required /> <br>" ;
-
-        
-
-        form_string += "<label>correctAnswer "+ i +"</label>";
-        form_string += "<input id='response" + i + "_correctAnswer" + "' type='number' min='1' max='4' step='1' required /> <br>";
-      }
-      form_string += "<button type='submit' value='Submit'>Submit</button>";
-
-       //document.write(form_string);
-      var temp = document.getElementById('responseEntry');
-      temp.insertAdjacentHTML('beforeend', form_string);
-    </script>
-
-    </form>
-
+<template name="quizSelect">
+	<form class="quizParameters">
+		<div class="form-group">
+			<label>Type:</label>
+			<input type="radio" name="quizType" value="Individual" required> Individual
+			<input type="radio" name="quizType" value="Group" required> Group
+		</div>
+		<div class="form-group">
+			<label>Category</label>
+			<select id="quizCategory">
+			  <option value="General">General</option>
+			  <option value="MELA">MELA</option>
+			  <option value="Sports">Sports</option>
+			</select>
+		</div>
+		<button type='submit' value='Submit'>Submit</button>
+	</form>
 </template>
 
-<template name="takequiz">
-	{{> logoutForm}}
-  <p>Select Quiz Type:</p>
-  <input type="radio" value="individual" name="individual" checked>Individual<br><br>
-  <input type="radio" value="group" name="group">Group<br><br>
-  <p>Select a Category:</p>
-  <select id="categories">
-    <option value="general">General</option>
-    <option value="mela">MELA</option>
-    <option value="sports">Sports</option>
-  </select> <br><br>
-  <input type="button" name="startQuiz" value="Enter Quiz">
+<template name="questionSelect">
+	Timer: {{time_left}}
+	<div class="form-group">
+		<input type="button" name="questionNumber" value="1">
+		<input type="button" name="questionNumber" value="2">
+	</div>
 </template>
 
-<template name="currentquiz">
-	{{> logoutForm}}
-      {{#each quizzes}}
-        {{#each questions}}
-          <p>Question: {{question}}</p>
-          <input type="radio" name="option" value="{{option1}}">{{option1}}<br>
-          <input type="radio" name="option" value="{{option2}}">{{option2}}<br>
-          <input type="radio" name="option" value="{{option3}}">{{option3}}<br>
-          <input type="radio" name="option" value="{{option4}}">{{option4}}<br>
-        {{/each}}
-      {{/each}}
-
-      <!--{{#each check}}
-        <ul>
-          <li>Name: {{name}}, CreatedAt: {{createdAt}}</li>
-        </ul>
-      {{/each}} -->
-</template>
-
-<template name="quizopedia">
-  <h1>Quiz-o-pedia</h1>
-  {{> yield }}
-  <hr>
-  <footer>Copyright &copy; 2016-2017, Quiz-o-pedia, Team 21</footer>
-</template>
-
-<template name="loginForm">
-	<form id="login-form">
-			<h2>Log In</h2>
-
-			<label for="login-username">Username</label>
-			<input type="text" id="login-username" class="form-control" placeholder="Username" /><br />
-
-			<label for="login-password">Password</label>
-			<input type="password" id="login-password" class="form-control" placeholder="Password" /><br />
-
-			<button class="btn btn-primary" type="submit">Log In</button>
-
-		</form>
-
-
-
-</template>
-
-<template name="signupForm">
-		<form id="signup-form">
-			<h2>Sign Up</h2>
-
-			<label for="signup-username">Username</label>
-			<input type="text" id="signup-username" class="form-control" placeholder="Username" /><br />
-
-			
-			<label for="signup-email">Email</label>
-			<input type="text" id="signup-email" class="form-control" placeholder="Email" /><br />
-
-			
-			<label for="signup-password">Password</label>
-			<input type="password" id="signup-password" class="form-control" placeholder="Password" /><br />
-
-			
-			<label for="signup-name">Name</label>
-			<input type="text" id="signup-name" class="form-control" placeholder="name" /><br />
-
-			<button class="btn btn-primary" type="submit">SignUp</button>
-
-		</form>
-
-	</template>
-
-	<template name="logoutForm">
-
-		<form id="logout-form">Welcome {{currentUser.profile.fullname}}<br /><button class="btn btn-danger" type="submit">Log Out</button>
-		</form>
+<template name="questionShow">
+	Question: {{questionData.question}}
+	<div class="form-group">
+		<input type="radio" name="questionAnswer" value={{questionData.option1}}>{{questionData.option1}}
+	</div>
+	<div class="form-group">
+		<input type="radio" name="questionAnswer" value={{questionData.option2}}>{{questionData.option2}}
+	</div>
+	<div class="form-group">
+		<input type="radio" name="questionAnswer" value={{questionData.option3}}>{{questionData.option3}}
+	</div>
+	<div class="form-group">
+		<input type="radio" name="questionAnswer" value={{questionData.option4}}>{{questionData.option4}}
+	</div>
+	
+	<button type='submit' value='submit' id="onsubmitbutton">Submit Quiz</button>
 </template>
