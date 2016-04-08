@@ -1,221 +1,269 @@
+// meteor add session accounts-ui accounts-password reactive-var
+
+ThisQuiz = new Mongo.Collection("quizzes");
+ThisResponse = new Mongo.Collection("responses");
+
+if (Meteor.isClient) {
+
+  var quizQuestions = [];
+
+  changeAnswer = function(question){
+     Meteor.call("getResponse", question, function(error, result){
+      if (error)
+        console.log(error.reason);
+      else {
+        if (result)
+          $('input[name=questionAnswer][value=' + result + ']').prop('checked',true);
+        else
+          $('input[name=questionAnswer]').prop('checked',false);
+      }
+    });
+  }
+
+  /* **************************************************************************************************** */
+  
+	/*Template.scorecard.onRendered(function(){
+		Meteor.call("checkAnswer")
+	})*/
+  
+  
+  
+  /* ******************************************************************************************************  */
+
+  Template.questionSelect.onCreated( function() {
+    this.time_left = new ReactiveVar(1200);
+  });
+
+  Template.questionSelect.onRendered( function() {
+
+    var self = this;
+
+    Meteor.call("getQuiz", function(error, result){
+      if (error)
+        console.log(error.reason);
+      else {
+        quizQuestions = result;
+        Session.set('selectedQuestion', '1');
+        changeAnswer('1');
+      }
+    });
+
+    Meteor.call("getTimer", function(error, result){
+      if (error)
+        console.log(error.reason);
+      else {
+        self.time_left.set(result);
+      }
+    });
+
+    Meteor.setInterval( function() {self.time_left.set(self.time_left.get() - 1);} , 1000 );
+    Meteor.setInterval( function() {Meteor.call('setTimer', self.time_left.get())} , 5000 );
+  });
+
+  Template.questionSelect.events({
+    'click input': function( event,template ) {
+      Session.set('selectedQuestion', event.target.value);
+      changeAnswer(event.target.value);
+    }
+  });
+
+  Template.questionSelect.helpers({
+    time_left: function() {
+      var time = Template.instance().time_left.get();
+      var minutes = ((Math.floor(time/60) < 10) ? '0' : '') + Math.floor(time/60);
+      var seconds = ((time%60 < 10) ? '0' : '') + (time%60);
+      return minutes+":"+seconds;
+    }
+  }); 
+
+  /* **************************************************************************************************** */
+  
+  Template.questionShow.events({
+    'click input': function( event,template ) {
+      Meteor.call('setResponse', parseInt(Session.get('selectedQuestion')) , event.target.value );
+    },
+		'click #onsubmitbutton' :function(){
+		
+				var responseID = Meteor.user().profile.current_response_id;
+	var response = ThisResponse.findOne(responseID);
+	var userId = Meteor.userId();
+	var answer = eval('response.answers.' + userId);
+	console.log(response);
+	console.log(userId);
+	console.log(answer);
+	console.log(answer[1]);
+	
+	var currentQuiz=response.quizID;
+	console.log(currentQuiz);
+	var correctOption=(ThisQuiz.findOne(currentQuiz));
+	var cor_array=[];
+	for(var i=0;i<2;i++){
+		var correct=correctOption.quiz[i];
+		var cor=correct.answer;
+		console.log(correct);
+		var cor='option'+cor;
+		cor_array[i]=correct.cor;
+		console.log(cor);
+	}
+	//var correct=correctOption.quiz[0].answer;
+	
+	for(var i=0;i<2;i++)
+	{
+		if(answer[i+1]===cor_array[i])
+		{
+			response.score+=10;
+		
+		}
+	}
+	console.log(response.score);
+
+	/*var userAnswer= getResponse(question);
+	if(userAnswer===correctOption)
+	{
+		response.score+=10;
+		console.log(response.score);
+	}*/
+	}
+  }); 
+
+  Template.questionShow.helpers({
+    questionData: function() {
+      return quizQuestions[parseInt(Session.get('selectedQuestion')) - 1];
+    },
+	
+
+  });   
+
+  /* **************************************************************************************************** */
+
+  Template.quizSelect.events({  
+    "submit .quizParameters": function (event) {
+      event.preventDefault();
+      var selectedType =  event.target.quizType.value;
+      var selectedCategory =  event.target.quizCategory.value;
+      Meteor.call("createResponse", selectedType, selectedCategory);
+    }
+  });
+
+  /* **************************************************************************************************** */
+}
 
 Router.configure({
-  layoutTemplate: 'quizopedia'
+  layoutTemplate: 'ApplicationLayout'
 });
 
-ThisQuiz = new Mongo.Collection('quizzes');
-Test = new Mongo.Collection('test');
-Check=new Mongo.Collection('checks');
+//Router.route('/addquiz', {
+ // name: 'addquiz',
+  //template: 'addquiz'
+//});
 
-var previousValue = 0;
-
-Router.route('/quiz', {
-  name: 'currentquiz',
-  template: 'currentquiz'
-});
-
-Router.route('/', {
-  name: 'quizopediahome',
-  template: 'quizopediahome'
-});
-
-Router.route('/addquiz', {
-  name: 'addquiz',
-  template: 'addquiz'
-});
-
-Router.route('/takequiz', {
-  name: 'takequiz',
-  template: 'takequiz'
-});
-
-
-Router.route('/checkResponses', {
-  name: 'checkResponses',
-  template: 'checkResponses'
-});
-/*
-Router.map(function() {
-    this.route('quizopediahome', {path: '/'});
-    this.route('addquiz', {path : '/addquiz'});
-    this.route('takequiz', {path : '/takequiz'});
-    this.route('currentquiz', {path : '/quiz'});
-});
-
-var mustBeSignedIn = function() {
-    if (!(Meteor.user() || Meteor.loggingIn())) {
-        Router.go('addquiz');
-    } else {
-        this.next();
-    }
-};
-var goHome = function() {
-    if (Meteor.user()) {
-        Router.go('quizopediahome');
-    } else {
-        this.next();
-    }
-};
-
-Router.onBeforeAction(mustBeSignedIn, {except: ['addquiz']});
-Router.onBeforeAction(goHome, {only: ['quizopediahome', 'addquiz']});
-*/
-if (Meteor.isClient) {
-  Template.signupForm.events({
-    'submit #signup-form': function(e,t){
-      e.preventDefault();
-
-
-      Accounts.createUser({
-        username:t.find('#signup-username').value,
-        password:t.find('#signup-password').value,
-        email:t.find('#signup-email').value,
-        profile:{
-          fullname:t.find('#signup-name').value
-        }
-
-      });
-      t.find('#signup-username').value = "";
-      t.find('#signup-password').value = "";
-      t.find('#signup-email').value = "";
-      t.find('#signup-name').value = "";
-      console.log("signed up");
-
-      if(username === 'admin'){
-        Router.go('addquiz');
-      }
-      else{
-        Router.go('takequiz');
-      }
-    }
-  });
-Template.logoutForm.events({
-    'click .btn-danger': function() {
-         Meteor.logout();
-         Router.go('quizopediahome');
-    }
-//x x
-});
-
-
-
-  Template.loginForm.events({
-    'submit #login-form': function(e,t) {
-      e.preventDefault();
-
-      var unam=t.find('#login-username').value;
-      var password=t.find('#login-password').value;
-      Meteor.loginWithPassword(unam,password);
-      if(unam === 'admin'){
-        Router.go('addquiz');
-      }
-
-      else{
-        Router.go('takequiz');
-      }
-    }
-});
-
-Template.addquiz.events({
-    "submit .quizEntry": function (event) {
-
-      event.preventDefault();
-      var que_array = new Array();
-      var creater =  event.target.creater.value;
-      var category =  event.target.category.value;
-
-      for (var i = 1; i <= 2; i++) {
-        eval("var que" + "= event.target.question" + i + ".value");
-        eval("var ans" + "= event.target.question" + i + "_answer.value");
-
-        for (var op = 1; op <= 4; op++) {
-          eval("var opt" + op + "= event.target.question" + i + "_option" + op + ".value");
-        }
-        que_array.push({question: que, option1: opt1, option2: opt2, option3: opt3, option4: opt4, answer: ans});
-      }
-      //console.log(que_object);
-      Meteor.call("addQuiz", creater, category, que_array);
-    }
-  });
-  
-  
-  Template.checkResponses.events({
-    "submit .responseEntry": function (event) {
-
-      event.preventDefault();
-      var res_array = new Array();
-	  var score=0;
-      
-
-      for (var i = 1; i <= 2; i++) {
-        eval("var res" + "= event.target.response" + i + ".value");
-        eval("var cor" + "= event.target.response" + i + "_correctAnswer.value");
-		console.log(res+" "+cor);
-		if(res===cor){
-			score+=10;
-		}
-        
-        res_array.push({response: res, correct: cor});
-		Check.insert(res_array);
-      }
-	  Session.set('score', score);
-	  //Check.insert( { response: 1, correct: 2 } );
-	  
-      //console.log(que_object);
-      //Meteor.call("checkResponses", res_array);
-	  console.log(score);
-    }
-  });
-  
-  Template.checkResponses.helpers({
-	  'dispScore': function() {
-		  return Session.get('score');
-	  }
-  })
-  
-  
-
-Template.takequiz.events({
-  'click [name=startQuiz]': function( event) {
-	  
-	  event.preventDefault();
-	  
-      var selectedCategory = $('#categories option:selected').text();
-      Session.set('category', selectedCategory);
-      Router.go('currentquiz');
-    }
-});
-
-Template.currentquiz.helpers({
-  'quizzes': function() {
-      var selectedCategory = Session.get('category');
-      var count = ThisQuiz.find( {category: selectedCategory}).count();
-      console.log(count);
-      var index = Math.floor(count * Math.random());
-      if(index == previousValue){
-        
-      }
-      var previousValue = index;
-      console.log(index);
-      return ThisQuiz.find( {category: selectedCategory}, {skip: index, limit: 1} );
-    },
-  'categorySelected': function() {
-    //console.log(Session.get('category'));
-    return Session.get('category');
-  },
-  'check': function() {
-    return Test.find({});
-  },
-  'questions': function() {
-    return this.quiz;
+Router.route('/', function () {
+  if (! Meteor.userId()) { 
+    this.render('login', {to:"template1"});
+    this.render('emptyTemplate', {to:"template2"}); 
+  }
+  else if (Meteor.user().profile.current_response_id == '') {
+    this.render('quizSelect', {to:"template1"});
+    this.render('emptyTemplate', {to:"template2"});
+  }
+  else {
+    this.render('questionSelect', {to:"template1"});
+    this.render('questionShow', {to:"template2"});
   }
 });
 
-}
+  /* **************************************************************************************************** */
 
+if(Meteor.isServer){
 
-if (Meteor.isServer) {
-  Meteor.startup(function () {
-   
+  Accounts.onCreateUser(function(options, user) {
+    user.profile = {};
+    user.profile.current_response_id = "";
+    user.stats = [];
+    if (options.profile)
+      user.profile = options.profile;
+    return user;
   });
+
+Meteor.methods({
+
+  getQuiz: function (){
+    var responseID = Meteor.user().profile.current_response_id;
+    var quizID = ThisResponse.findOne(responseID).quizID;
+    var randomQuiz = ThisQuiz.findOne(quizID);
+    var quizQuestions = randomQuiz.quiz;
+    for (var i=0 ; i<quizQuestions.length ; i++){
+      delete quizQuestions[i]["answer"];
+    }
+    return quizQuestions;
+  },
+
+  getRandomQuizID: function(category){
+    var randomQuiz = ThisQuiz.find({category:category}).fetch();
+    randomQuiz = randomQuiz[Math.floor(Math.random() * randomQuiz.length)];
+    return randomQuiz._id;
+  },
+
+  createResponse: function(type, category){
+    if (! Meteor.userId()) { throw new Meteor.Error('not-authorized'); }
+
+    var quizID = Meteor.call('getRandomQuizID', category);
+
+    var responseID = ThisResponse.insert({
+      userID: [Meteor.userId()],
+      quizID: quizID,
+      type: type,
+      answers: {[Meteor.userId()]: {}},
+      time_left: 1200,
+      score: {},
+      conductedAt: new Date()
+    });
+
+    Meteor.users.update(Meteor.user(), {$set: {"profile.current_response_id": responseID }});
+  },
+
+  setResponse: function (question, answer){
+    var responseID = Meteor.user().profile.current_response_id;
+    var user = Meteor.userId();
+    ThisResponse.update(responseID, {$set: {['answers.' + user + '.' + question]: answer}});
+  },
+
+  getResponse: function(question){
+    var responseID = Meteor.user().profile.current_response_id;
+    var user = Meteor.userId();
+    var response = ThisResponse.findOne(responseID).answers;
+    var answer = eval('response.' + user + '[' + question + ']');
+	console.log(answer);
+    return answer;
+  },
+
+  setTimer: function(new_time){
+    var responseID = Meteor.user().profile.current_response_id;
+    var response = ThisResponse.findOne(responseID);
+    if (response.time_left > new_time)
+      ThisResponse.update(response._id, {$set: {time_left: new_time}});
+  },
+
+  getTimer: function(){
+    var responseID = Meteor.user().profile.current_response_id;
+    return ThisResponse.findOne(responseID).time_left;
+  }
+  
+  /*checkAnswer: function(question){
+	var responseID = Meteor.user().profile.current_response_id;
+	var response = ThisResponse.findOne(responseID);
+	var answer = eval('response.' + user)
+	
+	var currentQuiz=response.quizID;
+	var correctOption=(quizzes.find(currentQuiz)).quiz[0].answer;
+
+	var userAnswer= getResponse(question);
+	if(userAnswer===correctOption)
+	{
+		response.score+=10;
+		return true;
+	}
+  }*/
+
+});
 }
