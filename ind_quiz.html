@@ -1,0 +1,180 @@
+<template name="ApplicationLayout">
+
+	{{>yield "template1"}}
+	{{>yield "template2"}}
+
+	
+</template>
+
+<template name="appBody">
+
+		
+
+ 		<div class="container">
+ 			<div class="row">
+ 					<div class="col-md-6 col-lg-6">
+ 			{{> loginForm}}
+ 					</div>
+ 					<div class="col-md-6 col-lg-6">
+ 			{{> signupForm}}
+ 				</div>
+ 			</div>	
+ 		</div>
+
+
+
+ 
+</template>
+
+
+
+<template name="signupForm">
+		<form id="signup-form">
+			<h2 id="sub_title">Sign Up</h2>
+
+			<label for="signup-username">Username</label>
+			<input type="text" id="signup-username" class="form-control" placeholder="Username" /><br />
+
+			
+			<label for="signup-email">Email</label>
+			<input type="text" id="signup-email" class="form-control" placeholder="Email" /><br />
+
+			
+			<label for="signup-password">Password</label>
+			<input type="password" id="signup-password" class="form-control" placeholder="Password" /><br />
+			<label id="limit">Password length should be atleast 4.</label><br />
+		    
+			
+			<label for="signup-confirm">Confirm Password</label>
+			<input type="password" id="signup-confirm" class="form-control" placeholder="Confirm password" /><br />
+
+			<button class="btn btn-primary" type="submit">SignUp</button>
+
+		</form>
+
+	</template>
+
+
+<template name="loginForm">
+	<form id="login-form">
+			<h2 id="sub_title">Log In</h2>
+
+			<label for="login-username">Username</label>
+			<input type="text" id="login-username" class="form-control" placeholder="Username" /><br />
+
+			<label for="login-password">Password</label>
+			<input type="password" id="login-password" class="form-control" placeholder="Password" /><br />
+
+			<button class="btn btn-primary" type="submit">Log In</button>
+
+		</form>
+
+
+
+</template>
+
+<template name="emptyTemplate"></template>
+
+<template name="waiting_time">
+{{#if ended}}
+	<h3>Time's Up!</h3>
+{{else}}
+	{{time_left}}
+{{/if}}
+
+
+<button class="btn logoutbtn btn-danger" type="submit" id="logoutbtn">Log Out</button>
+
+</template>
+
+<template name="quizSelect">
+	<form class="quizParameters">
+		<div class="form-group">
+			<label>Type:</label>
+			<input type="radio" name="quizType" value="Individual" required> Individual
+			<input type="radio" name="quizType" value="Group" required> Group
+		</div>
+		<div class="form-group">
+			<label>Category</label>
+			<select id="quizCategory">
+			  <option value="General">General</option>
+			  <option value="MELA">MELA</option>
+			  <option value="Sports">Sports</option>
+			</select>
+		</div>
+		<button type='submit' value='Submit'>Submit</button>
+	</form>
+	{{> Template.dynamic template="online"}}
+	<button class="btn logoutbtn btn-danger" type="submit" id="logoutbtn">Log Out</button>
+</template>
+
+<template name="questionSelect">
+	<!-- {{#if ended}}
+		<h3>Time's Up!</h3>
+	{{else}}
+		{{time_left}}
+	{{/if}} -->
+	{{time_left}}
+
+	<div class="form-group">
+		<input type="button" name="questionNumber" value="1">
+		<input type="button" name="questionNumber" value="2">
+	</div>
+</template>
+
+<template name="questionShow">
+	Question: {{questionData.question}}
+	<div class="form-group">
+		<input type="radio" name="questionAnswer" value={{questionData.option1}}>{{questionData.option1}}
+	</div>
+	<div class="form-group">
+		<input type="radio" name="questionAnswer" value={{questionData.option2}}>{{questionData.option2}}
+	</div>
+	<div class="form-group">
+		<input type="radio" name="questionAnswer" value={{questionData.option3}}>{{questionData.option3}}
+	</div>
+	<div class="form-group">
+		<input type="radio" name="questionAnswer" value={{questionData.option4}}>{{questionData.option4}}
+	</div>
+	<!-- {{#if showSubmitButton}} -->
+	 	<button type='submit' value='submit' id="onsubmitbutton">Submit Quiz</button>
+	<!-- {{/if}} -->
+
+	<button class="btn logoutbtn btn-danger" type="submit" id="logoutbtn">Log Out</button>
+</template>
+
+<template name="online">
+
+		{{#if totalGroupQuizzes}}
+				<p>Group quizzes to start soon</p>
+				<ul>
+				{{#each showGroupQuizzes}}
+				<li>Category:{{category}} Initiated By:{{userID}}</li><input type="button" value="Subscribe" id="{{_id}}">
+				{{/each}}
+				</ul>
+		{{/if}}
+
+
+</template>
+
+<template name="scoreCard">
+ 
+  <!-- <button type='submit' value='submit' id="onsubmitbutton">Submit Quiz</button> -->
+
+<p>
+      Total Score: {{getTotalScore}} <br/> <br/>
+
+        {{#each questionData}}
+          Question{{@index}}:{{arr1}}<br />
+        &emsp;  1:{{arr2}}<br />
+        &emsp;  2:{{arr3}}<br />
+        &emsp;  3:{{arr4}}<br />
+        &emsp;  4:{{arr5}}<br />
+          Correct Ans:{{arr6}}<br />
+          Your Ans: {{arr7}} <br /> 
+          Score: {{arr8}}<br/> <br/>
+        {{/each}}
+</p>
+<button class="btn logoutbtn btn-danger" type="submit" id="logoutbtn">Log Out</button>
+  
+</template>
